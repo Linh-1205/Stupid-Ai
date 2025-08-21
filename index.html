@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI ChatLGPT</title>
+    <title>Chat bot cutee >3</title>
     <style>
         * {
             margin: 0;
@@ -149,6 +149,7 @@
         .input-area::placeholder {
             color: #d1d5db;
         }
+        .upload-btn {
             background: linear-gradient(135deg, #f472b6, #f9a8d4);
             color: white;
             border: none;
@@ -328,6 +329,7 @@
             color: #991b1b;
             border-color: rgba(239, 68, 68, 0.2);
         }
+        @media (max-width: 768px) {
             .message-bubble {
                 max-width: 90%;
                 font-size: 14px;
@@ -337,6 +339,7 @@
                 font-size: 16px; /* Prevents zoom on iOS */
             }
         }
+        
     </style>
 </head>
 <body>
@@ -380,7 +383,7 @@
 
     <script>
         // Cấu hình
-        let tichCach = "bạn là một người cục súc dễ nổi cáu, mỗi khi trả lời câu hỏi thì chửi tôi câu";
+        let tichCach = "bạn là một cô người yêu dễ thương cute, khi nói chuyện thì xưng ôg với tui hoặc bà với tui nếu đối phương là con gái";
         let historyChat = [];
 
         // Khởi tạo
@@ -425,14 +428,16 @@
 
         function hideTypingIndicator() {
             const indicator = document.getElementById('typingIndicator');
-            indicator.style.display = 'none';
+            if (indicator) {
+                indicator.style.display = 'none';
+            }
         }
 
         async function getAnswer(question) {
-            const COHERE_API_KEY = "9MHD0XvvmkJQGfQpogAmNw6ozsZalaZa57OVFMPE"; // Thay bằng API key của bạn
+            const COHERE_API_KEY = "9MHD0XvvmkJQGfQpogAmNw6ozsZalaZa57OVFMPE";
             const COHERE_API_URL = "https://api.cohere.ai/v1/chat";
             
-            historyChat.push({"role": "user", "content": question});
+            historyChat.push({"role": "USER", "message": question});
             
             try {
                 const response = await fetch(COHERE_API_URL, {
@@ -440,13 +445,12 @@
                     headers: {
                         'Authorization': `Bearer ${COHERE_API_KEY}`,
                         'Content-Type': 'application/json',
-                        'Accept': 'application/json'
                     },
                     body: JSON.stringify({
                         model: "command-r-plus",
                         message: question,
-                        chat_history: historyChat.slice(1), // Loại bỏ system message vì Cohere API v1 không hỗ trợ
-                        preamble: tichCach, // Sử dụng preamble thay cho system message
+                        chat_history: historyChat,
+                        preamble: tichCach,
                         temperature: 0.7,
                         max_tokens: 1000
                     })
@@ -459,7 +463,7 @@
                 const data = await response.json();
                 const assistantMessage = data.text;
                 
-                historyChat.push({"role": "assistant", "content": assistantMessage});
+                historyChat.push({"role": "CHATBOT", "message": assistantMessage});
                 return assistantMessage;
                 
             } catch (error) {
@@ -467,25 +471,22 @@
                 
                 // Fallback về phản hồi mô phỏng nếu API lỗi
                 const fallbackResponses = [
-                    `Đm ${question}? API lỗi rồi nhưng tao vẫn trả lời được! ${generateAnswer(question)}`,
-                    `Ơ kìa, Cohere lỗi à? Không sao, ${generateAnswer(question)} Hiểu chưa?`,
-                    `API đang bị lỗi nhưng tao vẫn mạnh! ${generateAnswer(question)}`,
-                    `Cohere chết rồi à? Tao tự trả lời: ${generateAnswer(question)}`,
-                    `Lỗi API nhưng tao không bỏ cuộc! ${generateAnswer(question)}`
+                    `Đm ${question}? lỗi rồi nhưng tao vẫn trả lời được! ${generateAnswer(question)}`,
                 ];
                 
                 const assistantMessage = fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
-                historyChat.push({"role": "assistant", "content": assistantMessage});
+                historyChat.push({"role": "CHATBOT", "message": assistantMessage});
                 return assistantMessage;
             }
         }
+
 
         function generateAnswer(question) {
             // Tạo câu trả lời đơn giản dựa trên từ khóa
             const q = question.toLowerCase();
             
             if (q.includes('tên') || q.includes('name')) {
-                return "Tao là AI ChatLGPT, nhớ cho tao.";
+                return "Tao là AI Chat bot cute, nhớ cho tao.";
             } else if (q.includes('thời tiết')) {
                 return "Thời tiết thì ra ngoài mà xem, ngồi trong nhà hỏi tao làm gì!";
             } else if (q.includes('ăn') || q.includes('food')) {
@@ -500,7 +501,6 @@
                 return "Câu hỏi đơn giản mà cũng không biết trả lời.";
             }
         }
-
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const sendBtn = document.getElementById('sendBtn');
@@ -535,14 +535,15 @@
                 // Add bot message
                 addMessage(answer, 'bot');
             } catch (error) {
+                console.error('Error:', error);
                 hideTypingIndicator();
                 addMessage("Lỗi rồi! Thử lại đi!", 'bot');
+            } finally {
+                // Re-enable input
+                messageInput.disabled = false;
+                sendBtn.disabled = false;
+                messageInput.focus();
             }
-            
-            // Re-enable input
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            messageInput.focus();
         }
 
         function uploadFile() {
